@@ -45,12 +45,41 @@ jobs:
       - name: docker push
         run: docker push '${{secrets.DOCKER_HUB_USERNAME}}'/githubactions-aks-demo:'${{github.sha}}'
         
-        
-        
-        
-        
-        
-        
-        
-        
+      - name: Azure Kubernetes set context
+        uses: Azure/aks-set-context@v3
+        with:
+          # Resource Group Name
+          resource-group: aks1000
+          # AKS Cluster Name
+          cluster-name: githubactions-aks-demo-cluster
+          # AKS Cluster Subscription
+          subscription: '${{secrets.AZURE_CREDENTIALS}}'
+          
+      - name: Create secret in Kubernetes cluster
+        uses: Azure/k8s-create-secret@v3.0
+        with:
+          # Type of Kubernetes secret. Defaults to 'kubernetes.io/dockerconfigjson'.
+          secret-type: docker-registry
+          # Name of the secret. You can use this secret name in the Kubernetes YAML configuration file.
+          secret-name: docker-image-pull-secret
+          # Container Registry URL
+          container-registry-url: https://hub.docker.com/
+          # Container Registry user name
+          container-registry-username: '${{secrets.DOCKER_HUB_USERNAME}}'
+          # Container Registry password
+          container-registry-password: '${{secrets.DOCKER_HUB_ACCESS_TOKEN}}'
+         
+      - name: Deploy to Kubernetes cluster
+        uses: Azure/k8s-deploy@v4
+        with:
+          # Path to the manifest files which will be used for deployment.
+          manifests: 
+            k8/Deployment.yml
+            k8/service.yml
+          # Fully qualified resource URL of the image(s) to be used for substitutions on the manifest files Example: contosodemo.azurecr.io/helloworld:test
+          images: '${{secrets.DOCKER_HUB_USERNAME}}/githubactions-aks-demo:${{github.sha}}'
+          # Name of a docker-registry secret that has already been set up within the cluster. Each of these secret names are added under imagePullSecrets field for the workloads found in the input manifest files
+          imagepullsecrets: docker-image-pull-secret
+          # deploy, promote, or reject
+          action: deploy
         
