@@ -52,7 +52,7 @@ jobs:
           # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
           creds: '${{secrets.AZURE_CREDENTIALS}}'
           enable-AzPSSession: true 
-            
+          allow-no-subscriptions: true   
       
       - name: Azure Kubernetes set context
         uses: Azure/aks-set-context@v3
