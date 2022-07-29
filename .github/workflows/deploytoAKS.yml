@@ -53,7 +53,7 @@ jobs:
           # AKS Cluster Name
           cluster-name: githubactions-aks-demo-cluster
           # AKS Cluster Subscription
-          subscription: '${{secrets.AZURE_CREDENTIALS}}'
+          subscription: '${{secrets.AZURE_SUB}}'
           
       - name: Create secret in Kubernetes cluster
         uses: Azure/k8s-create-secret@v3.0
